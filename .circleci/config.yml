@@ -15,6 +15,9 @@ jobs:
       name: node/default
     steps:
       - checkout
+      - node/install:
+          install-yarn: true
+          node-version: '13.11'
       - node/install-packages:
           pkg-manager: yarn
       - run:
@@ -25,11 +28,18 @@ jobs:
     working_directory: ~/juice-shop
     docker:
       - image: cimg/node:lts-browsers
-      - image: bearer/bearer:latest-amd64
     steps:
+      - run:
+          command: |
+            sudo apt-get install -y apt-transport-https
+            echo "deb [trusted=yes] https://apt.fury.io/bearer/ /" | sudo tee -a /etc/apt/sources.list.d/fury.list
+            sudo apt-get update
+            sudo apt-get install -y bearer
       - checkout
-      - run: |
-          docker run bearer scan juice-shop --debug
+      - run:
+          name: Run bearer scan
+          command: |
+            bearer scan juice-shop --debug
 
 #
 #   # Invoke jobs via workflows
